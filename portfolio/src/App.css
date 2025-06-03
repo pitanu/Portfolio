@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.twinkling::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  z-index: -10;
+  top: 0;
+  left: 0;
+  background-image: radial-gradient(white 1px, transparent 1px);
+  opacity: 0.3;
+  animation: moveStars 100s linear infinite;
+}
+
+@keyframes moveStars {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-50%, -50%);
+  }
+
+}
+canvas {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -10;
+  pointer-events: none;
+}
