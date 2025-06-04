@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useInView } from "../hooks/useInView";
 
 export default function Contact() {
   const [status, setStatus] = useState(null);
