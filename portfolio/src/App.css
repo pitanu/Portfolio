@@ -30,7 +30,7 @@
 
 }
 canvas {
-  background: transparent !important;
+  background: black !important;
   border: none !important;
   box-shadow: none !important;
   position: fixed;
