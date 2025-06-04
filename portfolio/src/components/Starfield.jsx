@@ -5,10 +5,19 @@ export default function Starfield() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    if (!canvas) return;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.scale(dpr, dpr);
 
     const stars = Array.from({ length: 200 }, () => ({
       x: Math.random() * width,
@@ -20,6 +29,8 @@ export default function Starfield() {
       dAlpha: (Math.random() - 0.5) * 0.02,
     }));
 
+    let animationFrameId;
+
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
       for (const star of stars) {
@@ -27,7 +38,6 @@ export default function Starfield() {
         star.y += star.dy;
         star.alpha += star.dAlpha;
 
-        // Bounce at edges
         if (star.x < 0 || star.x > width) star.dx *= -1;
         if (star.y < 0 || star.y > height) star.dy *= -1;
         if (star.alpha < 0.1 || star.alpha > 1) star.dAlpha *= -1;
@@ -37,24 +47,32 @@ export default function Starfield() {
         ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
         ctx.fill();
       }
-      requestAnimationFrame(draw);
+      animationFrameId = requestAnimationFrame(draw);
     };
 
     draw();
 
     const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.scale(dpr, dpr);
     };
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
-return (
-  <canvas
-    ref={canvasRef}
-    className="fixed top-0 left-0 w-full h-full z-0 pointer-events-none"
-  />
-);
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"
+    />
+  );
 }
