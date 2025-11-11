@@ -47,7 +47,7 @@ export default function App() {
           <Typewriter lines={messages} speed={100} pause={1200} />
           <br></br>
           <p className="w-3/4">
-            I am a passionate developer student who loves building web apps with React.
+            I am a passionate developer, who loves building web apps with React.
             I enjoy creating beautiful, responsive interfaces with smooth user experience and robust security.
           </p>
         </div>
