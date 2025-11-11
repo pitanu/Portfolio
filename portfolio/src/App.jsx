@@ -16,7 +16,6 @@ export default function App() {
   const [contactRef, contactVisible] = useInView();
 
   const messages = [
-  "Student at OSAO",
   "Program developer",
   "Hobbyist photographer",
   "Computer security enthusiast",
