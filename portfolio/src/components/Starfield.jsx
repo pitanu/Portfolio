@@ -10,14 +10,12 @@ export default function Starfield() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    ctx.scale(dpr, dpr);
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    let width = 0;
+    let height = 0;
 
     const stars = Array.from({ length: 200 }, () => ({
       x: Math.random() * width,
@@ -31,7 +29,7 @@ export default function Starfield() {
 
     let animationFrameId;
 
-    const draw = () => {
+    const drawFrame = () => {
       ctx.clearRect(0, 0, width, height);
       for (const star of stars) {
         star.x += star.dx;
@@ -47,19 +45,37 @@ export default function Starfield() {
         ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
         ctx.fill();
       }
-      animationFrameId = requestAnimationFrame(draw);
     };
 
-    draw();
-
-    const handleResize = () => {
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const animate = () => {
+      drawFrame();
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    resizeCanvas();
+
+    if (prefersReducedMotion) {
+      drawFrame();
+    } else {
+      animate();
+    }
+
+    const handleResize = () => {
+      resizeCanvas();
+      if (prefersReducedMotion) {
+        drawFrame();
+      }
     };
 
     window.addEventListener("resize", handleResize);
@@ -72,7 +88,7 @@ export default function Starfield() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none"
+      className="starfield-canvas"
     />
   );
 }
