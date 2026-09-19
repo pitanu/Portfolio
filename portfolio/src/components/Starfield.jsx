@@ -17,6 +17,19 @@ export default function Starfield() {
     let width = 0;
     let height = 0;
 
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    resizeCanvas();
+
     const stars = Array.from({ length: 200 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -47,23 +60,10 @@ export default function Starfield() {
       }
     };
 
-    const resizeCanvas = () => {
-      const dpr = window.devicePixelRatio || 1;
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
     const animate = () => {
       drawFrame();
       animationFrameId = requestAnimationFrame(animate);
     };
-
-    resizeCanvas();
 
     if (prefersReducedMotion) {
       drawFrame();
