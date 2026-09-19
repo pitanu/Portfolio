@@ -7,20 +7,27 @@ export default function Contact() {
     e.preventDefault();
     setStatus("sending");
 
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: e.target.name.value,
-        email: e.target.email.value,
-        message: e.target.message.value,
-      }),
-    });
+    const form = e.currentTarget;
 
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.value.trim(),
+          email: form.email.value.trim(),
+          message: form.message.value.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to send message");
+      }
+
       setStatus("sent");
-      e.target.reset();
-    } else {
+      form.reset();
+    } catch (error) {
+      console.error(error);
       setStatus("error");
     }
   };
@@ -28,11 +35,11 @@ export default function Contact() {
   return (
     <>
       <div className="bg-transparent rounded-xl p-22 shadow-[0_0_15px_3px_rgba(0,255,255,0.7)] ring-1 ring-cyan-300">
-        <h1 className="text-4xl font-bold text-indigo-700 text-center">Contact Me</h1>
+        <h2 className="text-4xl font-bold text-indigo-700 text-center">Contact Me</h2>
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray">
+          <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-300">
             Name
           </label>
           <input
@@ -40,13 +47,15 @@ export default function Contact() {
             name="name"
             id="name"
             required
+            maxLength={100}
+            autoComplete="name"
             className="w-3/4 outline outline-1 outline-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center placeholder:text-center"
             placeholder="Your Name"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray">
+          <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-300">
             Email
           </label>
           <input
@@ -54,13 +63,15 @@ export default function Contact() {
             name="email"
             id="email"
             required
+            maxLength={254}
+            autoComplete="email"
             className="w-3/4 outline outline-1 outline-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center placeholder:text-center"
             placeholder="Your Email"
           />
         </div>
 
         <div>
-          <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray">
+          <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-300">
             Message
           </label>
           <textarea
@@ -68,6 +79,7 @@ export default function Contact() {
             id="message"
             rows="3"
             required
+            maxLength={5000}
             className="w-3/4 outline outline-1 outline-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-700 text-center placeholder:text-center"
             placeholder="Your Message"
           />
@@ -77,6 +89,7 @@ export default function Contact() {
           <button
             type="submit"
             disabled={status === "sending"}
+            aria-disabled={status === "sending"}
             className={`inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full transition duration-300 ${
               status === "sending" ? "opacity-70 cursor-not-allowed" : ""
             }`}
@@ -107,12 +120,14 @@ export default function Contact() {
           </button>
         </div>
           <br></br>
-        {status === "sent" && (
-          <p className="text-green-600 text-center font-medium">Your message has been sent!</p>
-        )}
-        {status === "error" && (
-          <p className="text-red-600 text-center font-medium">Something went wrong. Try again.</p>
-        )}
+        <div aria-live="polite">
+          {status === "sent" && (
+            <p className="text-green-600 text-center font-medium">Your message has been sent!</p>
+          )}
+          {status === "error" && (
+            <p className="text-red-600 text-center font-medium">Something went wrong. Try again.</p>
+          )}
+        </div>
       </form>
       </div>
     </>
