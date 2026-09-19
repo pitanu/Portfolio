@@ -36,10 +36,11 @@ export default function Typewriter({ lines = [], speed = 1000, pause = 1000 }) {
 
   return (
     <div className="w-full h-full flex justify-center items-center">
-      <h1 id="typewriter" className="text-4xl font-bold whitespace-pre-wrap">
+      <p className="sr-only">{lines.join(", ")}</p>
+      <p aria-hidden="true" className="text-4xl font-bold whitespace-pre-wrap">
         {displayed}
         <span className="animate-pulse">|</span>
-      </h1>
+      </p>
     </div>
   );
 }
