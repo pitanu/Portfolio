@@ -1,9 +1,9 @@
 import { useRef, useEffect } from "react";
 
 const LAYERS = [
-  { count: 100, radius: [0.3, 0.8], speed: 0.4, parallax: 4 },
-  { count: 60, radius: [0.6, 1.2], speed: 0.7, parallax: 9 },
-  { count: 40, radius: [1.0, 1.8], speed: 1.0, parallax: 16 },
+  { count: 100, radius: [0.3, 0.8], speed: 0.4 },
+  { count: 60, radius: [0.6, 1.2], speed: 0.7 },
+  { count: 40, radius: [1.0, 1.8], speed: 1.0 },
 ];
 
 function createStars(width, height) {
@@ -16,7 +16,6 @@ function createStars(width, height) {
       dx: (Math.random() - 0.5) * 0.05 * layer.speed,
       dy: (Math.random() - 0.5) * 0.05 * layer.speed,
       dAlpha: (Math.random() - 0.5) * 0.02,
-      parallax: layer.parallax,
     }))
   );
 }
@@ -72,26 +71,9 @@ export default function Starfield() {
     const meteors = [];
     let nextMeteorAt = performance.now() + 2500 + Math.random() * 6500;
 
-    // Mouse parallax: smoothed target offsets in [-1, 1].
-    let mouseX = 0;
-    let mouseY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
-    const onPointerMove = (e) => {
-      targetX = (e.clientX / width - 0.5) * 2;
-      targetY = (e.clientY / height - 0.5) * 2;
-    };
-
     const drawStar = (star) => {
       ctx.beginPath();
-      ctx.arc(
-        star.x + mouseX * star.parallax,
-        star.y + mouseY * star.parallax,
-        star.radius,
-        0,
-        2 * Math.PI
-      );
+      ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
       ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
       ctx.fill();
     };
@@ -144,9 +126,6 @@ export default function Starfield() {
           meteors.splice(i, 1);
         }
       }
-
-      mouseX += (targetX - mouseX) * 0.04;
-      mouseY += (targetY - mouseY) * 0.04;
     };
 
     let animationFrameId;
@@ -160,7 +139,6 @@ export default function Starfield() {
       for (const star of stars) drawStar(star);
     } else {
       animate();
-      window.addEventListener("pointermove", onPointerMove);
     }
 
     const handleResize = () => {
@@ -184,7 +162,6 @@ export default function Starfield() {
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("pointermove", onPointerMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
