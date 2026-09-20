@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { Check } from "lucide-react";
+import { useTilt } from "../hooks/useTilt";
 
 const inputClasses =
   "w-full rounded-lg bg-slate-900/70 border border-slate-700 px-4 py-2.5 text-left text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40 transition-colors";
 
 export default function Contact() {
   const [status, setStatus] = useState(null);
+  const tilt = useTilt();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +39,12 @@ export default function Contact() {
   };
 
   return (
-    <div className="rounded-2xl bg-slate-950/70 backdrop-blur-sm p-8 md:p-10 shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] ring-1 ring-indigo-400/30">
+    <div
+      ref={tilt.ref}
+      onPointerMove={tilt.onPointerMove}
+      onPointerLeave={tilt.onPointerLeave}
+      className="tilt-card rounded-2xl bg-slate-950/70 backdrop-blur-sm p-8 md:p-10 shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] ring-1 ring-indigo-400/30 hover:shadow-[0_0_55px_-8px_rgba(129,140,248,0.65)] hover:ring-indigo-400/60"
+    >
       <h2 className="text-4xl font-bold text-white text-center">Contact Me</h2>
       <p className="mt-2 text-center text-slate-400">
         Feel free to reach out — I'll get back to you as soon as I can.
@@ -103,7 +111,7 @@ export default function Contact() {
           type="submit"
           disabled={status === "sending"}
           aria-disabled={status === "sending"}
-          className={`w-full inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 transition duration-300 ${
+          className={`w-full inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 hover:shadow-[0_0_28px_rgba(99,102,241,0.55)] text-white font-semibold px-6 py-3 transition duration-300 ${
             status === "sending" ? "opacity-70 cursor-not-allowed" : ""
           }`}
         >
@@ -134,7 +142,10 @@ export default function Contact() {
 
         <div aria-live="polite">
           {status === "sent" && (
-            <p className="text-emerald-400 text-center font-medium">
+            <p className="flex items-center justify-center gap-2 text-emerald-400 text-center font-medium">
+              <span className="animate-pop-in inline-flex">
+                <Check size={18} />
+              </span>
               Your message has been sent!
             </p>
           )}
