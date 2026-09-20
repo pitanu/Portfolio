@@ -1,5 +1,43 @@
 import { useRef, useEffect } from "react";
 
+const LAYERS = [
+  { count: 100, radius: [0.3, 0.8], speed: 0.4, parallax: 4 },
+  { count: 60, radius: [0.6, 1.2], speed: 0.7, parallax: 9 },
+  { count: 40, radius: [1.0, 1.8], speed: 1.0, parallax: 16 },
+];
+
+function createStars(width, height) {
+  return LAYERS.flatMap((layer) =>
+    Array.from({ length: layer.count }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      radius: layer.radius[0] + Math.random() * (layer.radius[1] - layer.radius[0]),
+      alpha: Math.random(),
+      dx: (Math.random() - 0.5) * 0.05 * layer.speed,
+      dy: (Math.random() - 0.5) * 0.05 * layer.speed,
+      dAlpha: (Math.random() - 0.5) * 0.02,
+      parallax: layer.parallax,
+    }))
+  );
+}
+
+function createMeteor(width, height) {
+  const fromLeft = Math.random() < 0.5;
+  const speed = 6 + Math.random() * 5;
+  const angle = (Math.PI / 180) * (18 + Math.random() * 14);
+
+  return {
+    x: fromLeft
+      ? Math.random() * width * 0.5
+      : width * 0.5 + Math.random() * width * 0.5,
+    y: Math.random() * height * 0.35,
+    vx: Math.cos(angle) * speed * (fromLeft ? 1 : -1),
+    vy: Math.sin(angle) * speed,
+    life: 0,
+    maxLife: 60 + Math.random() * 40,
+  };
+}
+
 export default function Starfield() {
   const canvasRef = useRef(null);
 
@@ -30,17 +68,51 @@ export default function Starfield() {
 
     resizeCanvas();
 
-    const stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 1.2 + 0.5,
-      alpha: Math.random(),
-      dx: (Math.random() - 0.5) * 0.05,
-      dy: (Math.random() - 0.5) * 0.05,
-      dAlpha: (Math.random() - 0.5) * 0.02,
-    }));
+    const stars = createStars(width, height);
+    const meteors = [];
+    let nextMeteorAt = performance.now() + 2500 + Math.random() * 6500;
 
-    let animationFrameId;
+    // Mouse parallax: smoothed target offsets in [-1, 1].
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetX = 0;
+    let targetY = 0;
+
+    const onPointerMove = (e) => {
+      targetX = (e.clientX / width - 0.5) * 2;
+      targetY = (e.clientY / height - 0.5) * 2;
+    };
+
+    const drawStar = (star) => {
+      ctx.beginPath();
+      ctx.arc(
+        star.x + mouseX * star.parallax,
+        star.y + mouseY * star.parallax,
+        star.radius,
+        0,
+        2 * Math.PI
+      );
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      ctx.fill();
+    };
+
+    const drawMeteor = (meteor) => {
+      const fade = Math.sin(Math.min(meteor.life / meteor.maxLife, 1) * Math.PI);
+      const tail = 12;
+      const tailX = meteor.x - meteor.vx * tail;
+      const tailY = meteor.y - meteor.vy * tail;
+
+      const gradient = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${0.9 * fade})`);
+      gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(meteor.x, meteor.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+    };
 
     const drawFrame = () => {
       ctx.clearRect(0, 0, width, height);
@@ -53,12 +125,31 @@ export default function Starfield() {
         if (star.y < 0 || star.y > height) star.dy *= -1;
         if (star.alpha < 0.1 || star.alpha > 1) star.dAlpha *= -1;
 
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
-        ctx.fill();
+        drawStar(star);
       }
+
+      const now = performance.now();
+      if (now >= nextMeteorAt && meteors.length < 2) {
+        meteors.push(createMeteor(width, height));
+        nextMeteorAt = now + 2500 + Math.random() * 6500;
+      }
+
+      for (let i = meteors.length - 1; i >= 0; i--) {
+        const meteor = meteors[i];
+        meteor.x += meteor.vx;
+        meteor.y += meteor.vy;
+        meteor.life += 1;
+        drawMeteor(meteor);
+        if (meteor.life > meteor.maxLife || meteor.y > height + 40) {
+          meteors.splice(i, 1);
+        }
+      }
+
+      mouseX += (targetX - mouseX) * 0.04;
+      mouseY += (targetY - mouseY) * 0.04;
     };
+
+    let animationFrameId;
 
     const animate = () => {
       drawFrame();
@@ -66,21 +157,34 @@ export default function Starfield() {
     };
 
     if (prefersReducedMotion) {
-      drawFrame();
+      for (const star of stars) drawStar(star);
     } else {
       animate();
+      window.addEventListener("pointermove", onPointerMove);
     }
 
     const handleResize = () => {
+      const prevWidth = width;
+      const prevHeight = height;
       resizeCanvas();
+
+      // Keep stars spread over the new viewport instead of bunching at one edge.
+      for (const star of stars) {
+        if (prevWidth > 0) star.x = (star.x / prevWidth) * width;
+        if (prevHeight > 0) star.y = (star.y / prevHeight) * height;
+      }
+      meteors.length = 0;
+
       if (prefersReducedMotion) {
-        drawFrame();
+        ctx.clearRect(0, 0, width, height);
+        for (const star of stars) drawStar(star);
       }
     };
 
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("pointermove", onPointerMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
