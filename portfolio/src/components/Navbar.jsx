@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { Menu, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
-export default function Navbar({ visible }) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Navbar() {
+  const [active, setActive] = useState("#top");
 
   const navItems = [
     { name: "Home", href: "#top" },
@@ -10,53 +9,50 @@ export default function Navbar({ visible }) {
     { name: "Contact", href: "#contact" },
   ];
 
-  return (
-    <header
-      className={`bg-transparent shadow-md px-6 md:px-12 py-5 transition-all duration-700 ease-out z-50 mb-12 ${
-        visible ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0"
-      }`}>
+  // Scroll-spy: highlight the section currently in view
+  useEffect(() => {
+    const onScroll = () => {
+      const probe = window.scrollY + window.innerHeight * 0.35;
+      let current = "#top";
+      for (const { href } of navItems) {
+        const el = document.getElementById(href.slice(1));
+        if (el && el.getBoundingClientRect().top + window.scrollY <= probe) {
+          current = href;
+        }
+      }
+      setActive(current);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
 
+  return (
+    <header className="bg-transparent px-4 sm:px-6 md:px-12 py-5 z-50">
       <div className="relative max-w-7xl mx-auto flex items-center justify-center">
 
-        {/* Desktop Nav (centered) */}
-        <nav className="hidden md:flex gap-10 text-lg font-medium">
+        {/* Nav — frosted glass pill bar, visible at every screen size */}
+        <nav className="flex items-center gap-0.5 sm:gap-1 rounded-full bg-slate-950/60 p-1 sm:p-1.5 ring-1 ring-white/10 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.5)] backdrop-blur-md">
           {navItems.map(({ name, href }) => (
             <a
               key={name}
               href={href}
-              className="relative text-gray-600 hover:text-indigo-600 transition-colors duration-700 group"
+              aria-current={active === href ? "true" : undefined}
+              className={`rounded-full px-3.5 sm:px-5 py-1.5 text-sm sm:text-base font-medium transition duration-300 ${
+                active === href
+                  ? "bg-indigo-500/20 text-white ring-1 ring-indigo-400/40"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+              }`}
             >
               {name}
-              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-500 transition-all group-hover:w-full"></span>
             </a>
           ))}
         </nav>
-
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden text-gray-700 absolute right-0"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
       </div>
-
-      {/* Mobile Nav Menu */}
-      {isOpen && (
-        <div className="mt-4 flex flex-col items-center space-y-4 md:hidden text-lg font-medium">
-          {navItems.map(({ name, href }) => (
-            <a
-              key={name}
-              href={href}
-              className="text-gray-600 hover:text-indigo-600 transition-colors duration-300"
-              onClick={() => setIsOpen(false)}
-            >
-              {name}
-            </a>
-          ))}
-        </div>
-      )}
     </header>
   );
 }

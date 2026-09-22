@@ -4,10 +4,10 @@
   --font-sans: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Full-bleed: the inner sections center themselves (max-w-* + mx-auto),
+   so the root must not clamp the page or the starfield-only gutters
+   outside 1280px show up as darker strips beside the content. */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 1rem;
   text-align: center;
 }
 

@@ -9,7 +9,6 @@ import CursorGlow from "./components/CursorGlow.jsx";
 import Typewriter from "./components/Typewriter.jsx";
 
 export default function App() {
-  const [headerRef, headerVisible] = useInView();
   const [aboutRef, aboutVisible] = useInView();
   const [contactRef, contactVisible] = useInView();
 
@@ -20,39 +19,42 @@ export default function App() {
   ];
 
   return (
-    <div className="flex flex-col p-20 min-h-screen overflow-y-visible relative scroll-smooth">
+    <div id="top" className="flex flex-col p-6 md:p-20 min-h-screen overflow-y-visible relative scroll-smooth">
 
       {/* Starfield canvas background */}
       <Starfield />
       <CursorGlow />
 
-      {/* Navbar */}
-      <div ref={headerRef} className="relative z-50">
-        <Navbar visible={headerVisible} />
-      </div>
-      <br></br>
+      {/* First screen: navbar on top, hero centered in the space that remains */}
+      <div className="flex h-[calc(100svh_-_2.5rem)] md:h-[calc(100svh_-_6rem)] flex-col">
 
-      {/* Hero */}
-      <div className="relative isolate flex flex-col min-h-screen bg-transparent text-white items-center justify-center">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-        >
-          <div className="absolute left-1/2 top-1/2 h-[32rem] w-[56rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-[130px]" />
-          <div className="absolute -right-24 top-32 h-[20rem] w-[32rem] rounded-full bg-cyan-500/[0.06] blur-[110px]" />
+        {/* Navbar */}
+        <Navbar />
+
+        {/* Hero */}
+        <div className="relative isolate flex flex-1 flex-col bg-transparent text-white items-center justify-center">
+          {/* Nebula aura: bleeds past the page padding to the viewport edges so
+              the starfield-only gutters don't show as darker side strips. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 -inset-x-6 md:-inset-x-20 -z-10 overflow-hidden"
+          >
+            <div className="absolute left-1/2 top-1/2 h-[32rem] w-[56rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-[130px]" />
+            <div className="absolute -right-24 top-32 h-[20rem] w-[32rem] rounded-full bg-cyan-500/[0.06] blur-[110px]" />
+          </div>
+          <div>
+            <p className="text-sm uppercase tracking-[0.35em] text-slate-400">my name is</p>
+            <h1 className="bg-gradient-to-r from-indigo-300 via-sky-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(129,140,248,0.35)]">
+              Taavi Pinola
+            </h1>
+          </div>
+          <Typewriter lines={messages} speed={100} pause={1200} />
+          <br></br>
+          <p className="w-3/4 text-slate-400">
+            I am a passionate developer, who loves building web apps with React.
+            I enjoy creating beautiful, responsive interfaces with smooth user experience and robust security.
+          </p>
         </div>
-        <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-slate-400">my name is</p>
-          <h1 className="bg-gradient-to-r from-indigo-300 via-sky-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(129,140,248,0.35)]">
-            Taavi Pinola
-          </h1>
-        </div>
-        <Typewriter lines={messages} speed={100} pause={1200} />
-        <br></br>
-        <p className="w-3/4">
-          I am a passionate developer, who loves building web apps with React.
-          I enjoy creating beautiful, responsive interfaces with smooth user experience and robust security.
-        </p>
       </div>
 
       {/* About Me */}

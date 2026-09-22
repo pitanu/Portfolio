@@ -35,7 +35,7 @@ export default function Typewriter({ lines = [], speed = 1000, pause = 1000 }) {
   }, [charIndex, isDeleting, lineIndex, lines, speed, pause]);
 
   return (
-    <div className="w-full h-full flex justify-center items-center">
+    <div className="w-full flex justify-center items-center">
       <p className="sr-only">{lines.join(", ")}</p>
       <p aria-hidden="true" className="text-4xl font-bold whitespace-pre-wrap">
         {displayed}
