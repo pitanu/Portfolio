@@ -7,10 +7,27 @@ import AboutMe from "./components/AboutMe";
 import Starfield from "./components/Starfield.jsx";
 import CursorGlow from "./components/CursorGlow.jsx";
 import Typewriter from "./components/Typewriter.jsx";
+import Projects from "./components/Projects.jsx";
 
 export default function App() {
   const [aboutRef, aboutVisible] = useInView();
   const [contactRef, contactVisible] = useInView();
+
+  if (window.location.pathname === "/projects") {
+    return (
+      <div className="relative flex min-h-screen flex-col overflow-hidden p-6 md:p-12">
+        <Starfield />
+        <CursorGlow />
+        <Navbar />
+        <Projects />
+        <footer className="z-10 mt-auto flex w-full justify-center bg-transparent text-gray-400">
+          <div className="max-w-5xl">
+            <Footer />
+          </div>
+        </footer>
+      </div>
+    );
+  }
 
   const messages = [
   "Program developer",

@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
 
+const navItems = [
+  { name: "Home", href: "#top" },
+  { name: "About", href: "#aboutMe" },
+  { name: "Projects", href: "/projects" },
+  { name: "Contact", href: "#contact" },
+];
+
 export default function Navbar() {
   const [active, setActive] = useState("#top");
-
-  const navItems = [
-    { name: "Home", href: "#top" },
-    { name: "About", href: "#aboutMe" },
-    { name: "Contact", href: "#contact" },
-  ];
 
   // Scroll-spy: highlight the section currently in view
   useEffect(() => {
     const onScroll = () => {
+      if (window.location.pathname === "/projects") {
+        setActive("/projects");
+        return;
+      }
       const probe = window.scrollY + window.innerHeight * 0.35;
       let current = "#top";
       for (const { href } of navItems) {
@@ -40,8 +45,8 @@ export default function Navbar() {
           {navItems.map(({ name, href }) => (
             <a
               key={name}
-              href={href}
-              aria-current={active === href ? "true" : undefined}
+              href={href === "/projects" ? href : window.location.pathname === "/projects" ? `/${href}` : href}
+              aria-current={active === href ? "page" : undefined}
               className={`rounded-full px-3.5 sm:px-5 py-1.5 text-sm sm:text-base font-medium transition duration-300 ${
                 active === href
                   ? "bg-indigo-500/20 text-white ring-1 ring-indigo-400/40"
